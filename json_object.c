@@ -33,6 +33,10 @@
 #include "printbuf.h"
 #include "snprintf_compat.h"
 #include "strdup_compat.h"
+#include <sys/types.h>
+#include <limits.h>
+#include <stdint.h>
+#include <unistd.h>
 
 /* Avoid ctype.h and locale overhead */
 #define is_plain_digit(c) ((c) >= '0' && (c) <= '9')
@@ -41,13 +45,21 @@
 #error The long long type is not 64-bits
 #endif
 
+#ifndef SIZEOF_SSIZE_T
+#if defined(__x86_64__) || defined(_M_X64)
+#define SIZEOF_SSIZE_T 8
+#elif defined(__i386__) || defined(_M_IX86)
+#define SIZEOF_SSIZE_T 4
+#else
+#error Unable to determine size of ssize_t
+#endif
+#endif
+
 #ifndef SSIZE_T_MAX
-#if SIZEOF_SSIZE_T == SIZEOF_INT
+#if SIZEOF_SSIZE_T == 4
 #define SSIZE_T_MAX INT_MAX
-#elif SIZEOF_SSIZE_T == SIZEOF_LONG
+#elif SIZEOF_SSIZE_T == 8
 #define SSIZE_T_MAX LONG_MAX
-#elif SIZEOF_SSIZE_T == SIZEOF_LONG_LONG
-#define SSIZE_T_MAX LLONG_MAX
 #else
 #error Unable to determine size of ssize_t
 #endif
